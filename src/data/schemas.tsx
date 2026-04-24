@@ -1,29 +1,58 @@
 import { z } from "zod";
 
+
+export const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+
+export const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string().email(),
+  created_at: z.string().optional(),
+});
+
+export const LoginResponseSchema = z.object({
+   message: z.string(),
+   user: UserSchema,
+});
+
+export const MeResponseSchema = z.object({
+  user: UserSchema,
+});
+
+
+
+
 // Pool FK IDs from existing tables
 export const AssetSchema = z.object({
   asset_id: z.number().optional(),
   asset_name: z.string().optional(),
-  category_id: z.number(),
-  sub_category_id: z.number(),
-  type_id: z.number({ message: "Type is required" }),
+category_id: z.coerce.number({ message: "Category is required" }).min(1, "Category is required"),
+sub_category_id: z.coerce.number({ message: "Sub-category is required" }).min(1, "Sub-category is required"), 
+sub_category_name: z.string().optional(),
+type_id: z.coerce.number({ message: "Type is required" }).min(1, "Type is required"),
+type_name: z.string().optional(), 
   asset_condition_id: z.number(),
   location: z.string().nullable().optional(),
   status_id: z.number().optional(),
-  serial_number: z.string({ message: "Serial number is required" }),
-  brand: z.string({ message: "Brand is required " }),
-  specifications: z
-    .string({ message: "Specifications is required" })
-    .min(5, "Specifications must be at least 5 characters")
-    .max(100, "Specifications must be at most 100 characters."),
+  serial_number: z.string({ message: "Serial number is required" }).min(1, "Serial number is required"),
+brand: z.string({ message: "Brand is required" }).min(1, "Brand is required"),
+specifications: z
+  .string({ message: "Specifications is required" })
+  .min(5, "Specifications must be at least 5 characters")
+  .max(100, "Specifications must be at most 100 characters."),
+
   asset_amount: z.number({ message: "Amount is required " }),
   warranty_due_date: z.date({ message: "Warranty Due Date is required" }),
-  warranty_duration: z.number().optional(),
+  warranty_duration: z.coerce.number(),
   purchase_date: z.date({ message: "Purchase Date is required" }),
-  notes: z
-    .string({ message: "Notes is required" })
-    .min(5, "Notes must be at least 5 characters")
-    .max(100, "Notes must be at most 100 characters."),
+notes: z
+  .string({ message: "Notes is required" })
+  .min(5, "Notes must be at least 5 characters")
+  .max(100, "Notes must be at most 100 characters."),
   file: z.array(z.string()).optional(),
   insurance_id: z.number().nullable().optional(),
 });
@@ -39,6 +68,19 @@ export const InsuranceSchema = z.object({
   insurance_coverage: z.string({ message: "Coverage is required" }),
   insurance_date_from: z.date({ message: "Date From is required" }),
   insurance_date_to: z.date({ message: "Dato To is required" }),
+});
+
+export const LogSchema = z.object({
+  log_id: z.number(),
+  performed_by: z.number().nullable(),
+  action: z.string(),
+  subject_type: z.string(),
+  subject_id: z.number().nullable(),
+  asset_id: z.number().nullable(),
+  description: z.string().nullable(),
+  old_values: z.string().nullable(),
+  new_values: z.string().nullable(),
+  created_at: z.string(), 
 });
 
 export const RepairSchema = z.object({
@@ -91,12 +133,12 @@ export const BorrowSchema = z.object({
 
 export const IssuanceSchema = z.object({
   asset_id: z.number(),
-  category_id: z.number(),
-  sub_category_id: z.number(),
-  type_id: z.number(),
+  // category_id: z.number(),
+  // sub_category_id: z.number(),
+  // type_id: z.number(),
 
   user_id: z.number(),
-  company_id: z.number(),
+  // company_id: z.number(),
   department_id: z.number().optional(),
 
   issuance_date: z.date().optional(),
@@ -169,4 +211,5 @@ export const AssetTypeSchema = AssetSubCategorySchema.extend({
     .string({ message: "Code is required" })
     .length(3, "Code must be exactly 3 characters")
     .optional(),
+  status_id: z.number().optional(),
 });

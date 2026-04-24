@@ -6,6 +6,7 @@ import { format, isDate } from "date-fns";
 import { toast } from "sonner";
 
 const REPAIR = "repair";
+const ASSET = "asset";
 
 export const useRepairs = () => {
   return useQuery({
@@ -20,7 +21,7 @@ export const useRepairs = () => {
         };
       });
     },
-    staleTime: 60 * 10 * 1000,
+     staleTime: 1000 * 30, 
   });
 };
 
@@ -35,7 +36,7 @@ export const useRepair = (id: number) => {
         repair_start_date: new Date(item.repair_start_date),
       };
     },
-    staleTime: 60 * 10 * 1000,
+     staleTime: 1000 * 30, 
   });
 };
 
@@ -54,7 +55,9 @@ export const useAddRepair = <TData = unknown>() => {
       return payload;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [REPAIR] });
+      queryClient.invalidateQueries({ queryKey: [REPAIR] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
       toast.success("Successfully added new Repair");
     },
     onError: catchError,
@@ -81,7 +84,9 @@ export const useUpdateRepair = <TData extends {}>() => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [REPAIR] });
+        queryClient.invalidateQueries({ queryKey: [REPAIR] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
     },
     onError: catchError,
   });
@@ -92,16 +97,18 @@ export const useDeleteRepair = () => {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await api.delete(`index.php?resource=repair`, {
-        params: {
-          id: id,
-        },
+      const response = await api.put(`index.php?resource=repair`, {
+        id,
+        columns: ['status_id'],
+        values: [14],
       });
 
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [REPAIR] });
+      queryClient.invalidateQueries({ queryKey: [REPAIR] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
     },
     onError: catchError,
   });

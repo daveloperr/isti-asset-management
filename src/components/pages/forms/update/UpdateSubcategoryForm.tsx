@@ -61,7 +61,7 @@ function UpdateSubCategoryForm({ subCategory }: UpdateSubCategoryFormProps) {
         <FormPopoverTrigger
           icon={SquarePen}
           name="Update Subcategory"
-          variant="ghost"
+          variant="outline"
         />
       }
       title="Update Sub Category Name"

@@ -54,7 +54,7 @@ export function useBorrowColumns() {
       cell: ({ row }) => {
         const { getAsset, getStatusIdGivenStatusName } = useLookupFunctions();
         const asset = getAsset(row.original.asset_id);
-        const isReturned = row.original.return_date != null;
+        const isReturned = !!row.original.return_date;
         const isDeleted =
           asset?.status_id ===
           getStatusIdGivenStatusName("Asset Inventory", "Deleted");

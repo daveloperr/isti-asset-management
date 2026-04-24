@@ -12,7 +12,7 @@ interface PopoverFormProps<T extends FieldValues> {
   description?: string;
   subtitle?: React.ReactNode;
   form: UseFormReturn<T>;
-  onSubmit: (values: T) => void;
+  onSubmit: (values: T) =>  boolean | void;
   children: React.ReactNode;
   submitButtonText: string;
   submitButtonIcon?: React.ReactNode;
@@ -46,9 +46,15 @@ function PopoverForm<T extends FieldValues>({
   const [open, setOpen] = useState(false);
 
   const handleSubmit = (values: T) => {
-    onSubmit(values);
-    setOpen(false);
-    form.reset();
+    // onSubmit(values);
+    // setOpen(false);
+    // form.reset();
+    const success = onSubmit(values);
+
+    if(success !== false) {
+      setOpen(false);
+      form.reset();
+    }
   };
 
   const handleReject = () => {

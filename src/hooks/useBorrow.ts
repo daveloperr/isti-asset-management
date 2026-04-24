@@ -6,6 +6,7 @@ import { format, isDate } from "date-fns";
 import { toast } from "sonner";
 
 const BORROW = "borrow";
+const ASSET = "asset";
 
 export const useBorrows = () => {
   return useQuery({
@@ -23,7 +24,8 @@ export const useBorrows = () => {
         };
       });
     },
-    staleTime: 60 * 10 * 1000,
+     staleTime: 1000 * 30, 
+
   });
 };
 
@@ -39,7 +41,8 @@ export const useBorrow = (id: number) => {
         return_date: new Date(item.return_date as Date),
       };
     },
-    staleTime: 60 * 10 * 1000,
+      staleTime: 1000 * 30, 
+
   });
 };
 
@@ -56,7 +59,8 @@ export const useAddBorrow = <TData = unknown>() => {
     },
     onSuccess: (data) => {
       if (typeof data === "object") {
-        queryClient.refetchQueries({ queryKey: [BORROW] });
+        queryClient.invalidateQueries({ queryKey: [BORROW] });
+        queryClient.invalidateQueries({ queryKey: [ASSET] });
         toast.success("Successfully added new Borrow");
       } else {
         throw new Error("Failed to add new Borrow");
@@ -70,9 +74,10 @@ export const useUpdateBorrow = <TData extends {}>() => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: TData }) => {
+  mutationFn: async ({ id, data, type }: { id: number; data: TData; type?: string }) => {
       const response = await api.put(`index.php?resource=borrow`, {
         id: id,
+        type: type,
         values: Object.values(data).map((value) => {
           if (isDate(value)) {
             return format(value, "yyyy-MM-dd");
@@ -86,7 +91,9 @@ export const useUpdateBorrow = <TData extends {}>() => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [BORROW] });
+      queryClient.invalidateQueries({ queryKey: [BORROW] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
     },
     onError: catchError,
   });
@@ -97,16 +104,18 @@ export const useDeleteBorrow = () => {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await api.delete(`index.php?resource=borrow`, {
-        params: {
-          id: id,
-        },
+      const response = await api.put(`index.php?resource=borrow`, {
+        id,
+        columns: ['status_id'],
+        values: [14],
       });
 
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [BORROW] });
+      queryClient.invalidateQueries({ queryKey: [BORROW] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
     },
     onError: catchError,
   });

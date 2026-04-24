@@ -5,8 +5,10 @@ function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset />
-      <main className="w-full">{children}</main>
+
+      <SidebarInset className="flex flex-col w-full min-w-0">
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

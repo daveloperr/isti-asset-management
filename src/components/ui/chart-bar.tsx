@@ -41,7 +41,7 @@ export function ChartBar({ chartData, title, description }: ChartBarProps) {
       <CardContent>
         <ChartContainer
           config={{
-            count: { label: "Borrows", color: "#1e1b4b" },
+            count: { label: title, color: "#1e1b4b" },
           }}
         >
           <BarChart className="w-full" accessibilityLayer data={data}>

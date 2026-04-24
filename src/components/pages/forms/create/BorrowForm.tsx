@@ -19,7 +19,11 @@ import { useAddBorrow, useBorrows } from "@/hooks/useBorrow";
 import { addMonths, format } from "date-fns";
 import { useEmployees } from "@/hooks/useUNMG";
 
-function BorrowForm() {
+interface BorrowFormProps {
+  onSuccess?: () => void;
+}
+
+function BorrowForm({ onSuccess }: BorrowFormProps) {
   const form = useForm<Borrow>({
     resolver: zodResolver(BorrowSchema),
     defaultValues: {
@@ -89,6 +93,7 @@ function BorrowForm() {
       },
       {
         onSuccess: () => {
+          onSuccess?.();
           form.reset();
         },
         onError: (error) => {

@@ -59,11 +59,11 @@ function AssetDataTable({
       onColumnVisibilityChange={setColumnVisibility}
       hasAssetBatchUpload={true}
     >
-      <AssetTypeDropdown
-        assetTypes={assetTypes}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-      />
+        <AssetTypeDropdown
+          assetTypes={assetTypes}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+        />
     </DataTable>
   );
 }

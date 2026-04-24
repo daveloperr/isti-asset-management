@@ -31,6 +31,14 @@ function AssetBatchUploadPage() {
     return new Date(ms);
   };
 
+  const toSnakeCase = (str: string) =>
+    str
+      .trim()
+      .replace(/([a-z])([A-Z])/g, "$1_$2") // camelCase → camel_Case
+      .replace(/[\s\-]+/g, "_")            // spaces/dashes → _
+      .replace(/__+/g, "_")                // remove duplicate _
+      .toLowerCase();
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -50,39 +58,41 @@ function AssetBatchUploadPage() {
 
       const normalized = jsonData.map((row) => {
         const out: Record<string, any> = {};
+
         Object.entries(row).forEach(([k, v]) => {
-          const key = String(k).toLowerCase();
+          const key = toSnakeCase(k); // normalize key here
 
           // amount -> format as number with commas
           if (key.includes("amount")) {
             const num = Number(v) || 0;
-            out[k] = nf.format(num);
+            out[key] = nf.format(num);
             return;
           }
 
           // date-like fields -> format yyyy-MM-dd
-          if (/(purchase|warranty|date)/i.test(k)) {
+          if (/(purchase|warranty|date)/i.test(key)) {
             if (typeof v === "number") {
               const d = excelSerialToDate(v);
-              out[k] = format(d, "yyyy-MM-dd");
+              out[key] = format(d, "yyyy-MM-dd");
             } else if (v) {
               const d = new Date(v);
-              out[k] = !isNaN(d.getTime())
+              out[key] = !isNaN(d.getTime())
                 ? format(d, "yyyy-MM-dd")
                 : String(v);
             } else {
-              out[k] = "";
+              out[key] = "";
             }
             return;
           }
 
           // default passthrough
-          out[k] = v;
+          out[key] = v;
         });
+
         return out;
       });
 
-      setExcelData(normalized); // store normalized rows
+      setExcelData(normalized);
     };
 
     reader.readAsArrayBuffer(file);

@@ -18,6 +18,7 @@ interface UpdateTypeFormProps {
 function UpdateTypeForm({ type }: UpdateTypeFormProps) {
   const form = useForm<Asset_Type>({
     resolver: zodResolver(AssetTypeSchema),
+    
     defaultValues: {
       ...type,
     },
@@ -61,7 +62,7 @@ function UpdateTypeForm({ type }: UpdateTypeFormProps) {
         <FormPopoverTrigger
           icon={SquarePen}
           name="Update Type"
-          variant="ghost"
+          variant="outline"
         />
       }
       title="Update Type Name"
@@ -69,7 +70,7 @@ function UpdateTypeForm({ type }: UpdateTypeFormProps) {
         <div className="flex flex-col sm:flex-row sm:items-center gap-1">
           <span className="text-sm text-muted-foreground">Current:</span>
           <Badge className="font-semibold bg-red-100 text-red-700 border-transparent">
-            {type.type_name} {type.code}
+            {type.type_name} {type.type_code}
           </Badge>
           <Badge className="font-semibold bg-red-100 text-red-700 border-transparent">
             {type.type_code}

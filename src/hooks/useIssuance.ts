@@ -7,6 +7,7 @@ import { format, isDate } from "date-fns";
 import { toast } from "sonner";
 
 const ISSUANCE = "issuance";
+const ASSET = "asset";
 
 export const useIssuances = () => {
   return useQuery({
@@ -25,7 +26,7 @@ export const useIssuances = () => {
         };
       });
     },
-    staleTime: 60 * 10 * 1000,
+     staleTime: 1000 * 30, 
   });
 };
 
@@ -44,7 +45,7 @@ export const useIssuance = (id: number) => {
           : undefined,
       };
     },
-    staleTime: 60 * 10 * 1000,
+     staleTime: 1000 * 30, 
   });
 };
 
@@ -61,7 +62,9 @@ export const useAddIssuance = <TData = unknown>() => {
     },
     onSuccess: (data) => {
       if (typeof data === "object") {
-        queryClient.refetchQueries({ queryKey: [ISSUANCE] });
+        queryClient.invalidateQueries({ queryKey: [ISSUANCE] });
+        queryClient.invalidateQueries({ queryKey: [ASSET] });
+
         toast.success("Successfully added new Issuance");
       } else {
         throw new Error("Failed to add new Issuance");
@@ -102,7 +105,9 @@ export const useUpdateIssuance = <TData extends {}>() => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [ISSUANCE] });
+      queryClient.invalidateQueries({ queryKey: [ISSUANCE] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
     },
     onError: catchError,
   });
@@ -113,16 +118,18 @@ export const useDeleteIssuance = () => {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await api.delete(`index.php?resource=issuance`, {
-        params: {
-          id: id,
-        },
+      const response = await api.put(`index.php?resource=issuance`, {
+        id,
+        columns: ['status_id'],
+        values: [14],
       });
 
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [ISSUANCE] });
+      queryClient.invalidateQueries({ queryKey: [ISSUANCE] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
+
     },
     onError: catchError,
   });

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChartBar } from "@/components/ui/chart-bar";
 import ChartPieConditions from "@/components/ui/chart-pie-conditions";
 import ChartLineRepairsPerMonth from "@/components/ui/line-chart-repairs";
+import { ChartBarStacked } from "@/components/ui/chart-bar-stacked";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { CompanyAssetCount, Employee } from "@/data/types";
 import { useAssets } from "@/hooks/useAsset";
@@ -21,6 +22,7 @@ import { differenceInDays } from "date-fns";
 
 function Dashboard() {
   const { data: assets } = useAssets();
+  console.log("RAW ASSETS:", assets?.length);
   const { data: issuances } = useIssuances(); // not deleted and pulled out
   const { data: borrows } = useBorrows(); // not deleted do not include returned
   const { data: repairs } = useRepairs(); // status is under repair
@@ -32,14 +34,28 @@ function Dashboard() {
     getCompanyName,
   } = useLookupFunctions();
 
+
+
   const AvailableStatusId = getStatusIdGivenStatusName(
     "Asset Inventory",
     "Available"
   );
+
   const DeletedStatusId = getStatusIdGivenStatusName(
     "Asset Inventory",
     "Deleted"
   );
+
+  const IssuedStatusId = getStatusIdGivenStatusName(
+    "Issuance",
+    "Issued"
+  );
+
+  const BorrowedStatusId = getStatusIdGivenStatusName(
+    "Asset Inventory",
+    "Borrowed"
+  );
+
   const UnderRepairStatusId = getStatusIdGivenStatusName(
     "Repair",
     "Under Repair"
@@ -50,24 +66,46 @@ function Dashboard() {
   );
 
   /* METRICS */
+
+
+  const issuedCount = assets?.filter((a) => a.status_id === IssuedStatusId).length ?? 0;
+  const borrowedCount = assets?.filter((a) => a.status_id === BorrowedStatusId).length ?? 0;
+  const underRepairCount = assets?.filter((a) => a.status_id === UnderRepairStatusId).length ?? 0;
+
+
+
+
   const totalAssets = assets
     ? assets.filter((a) => a.status_id !== DeletedStatusId).length
     : 0;
   const availableAssets = assets
     ? assets.filter((a) => a.status_id === AvailableStatusId).length
     : 0;
+
+
   const issuedAssets = issuances
     ? issuances.filter(
-        (i) =>
-          i.status_id !== DeletedStatusId && i.status_id !== PulledOutStatusId
-      )
+      (i) =>
+        i.status_id !== DeletedStatusId && i.status_id !== PulledOutStatusId
+    )
     : [];
+
   const borrowedAssets = borrows
     ? borrows.filter((b) => b.return_date == null)
     : [];
   const underRepairAssets = repairs
     ? repairs.filter((r) => r.status_id === UnderRepairStatusId)
     : [];
+
+
+
+
+
+
+
+  console.log("issuedAssets", issuedAssets);
+  console.log("PulledOutStatusId", PulledOutStatusId);
+  console.log("DeletedStatusId", DeletedStatusId);
 
   /* LISTS */
   const overdueBorrows = borrowedAssets?.filter((b) => {
@@ -78,6 +116,16 @@ function Dashboard() {
   const criticalUnderRepairs = underRepairAssets?.filter(
     (r) => r.urgency_id === getUrgencyId("Critical")
   );
+
+
+  const subCategories = [
+    ...new Map(
+      assets
+        ?.filter((a) => a.status_id !== DeletedStatusId)
+        .map((a) => [a.type_id, { id: a.type_id, name: a.type_name }])
+    ).values(),
+  ];
+
 
   /* BARS */
   const companyBorrows: CompanyAssetCount[] = (() => {
@@ -116,6 +164,26 @@ function Dashboard() {
       .sort((a, b) => b.count - a.count);
   })();
 
+
+ const subCategoryAvailability = subCategories.map((subCat) => {
+  const available = assets
+    ? assets.filter(
+        (a) => a.status_id === AvailableStatusId && a.type_id === subCat.id
+      ).length
+    : 0;
+  const total = assets
+    ? assets.filter(
+        (a) => a.status_id !== DeletedStatusId && a.type_id === subCat.id
+      ).length
+    : 0;
+
+  return {
+    sub_category_name: subCat.name ?? "Unknown", // ← fallback here
+    available,
+    unavailable: total - available,
+  };
+});
+
   // PIE CHART
 
   return (
@@ -128,25 +196,19 @@ function Dashboard() {
           desc="All tracked assets"
         />
         <SectionCard
-          title="Available"
+          title="Total Available Assets"
           value={availableAssets}
           desc="Ready for assignment"
         />
-        <SectionCard
-          title="Under Repair"
-          value={underRepairAssets ? underRepairAssets.length : 0}
-          desc="Assets in repair"
-        />
-        <SectionCard
-          title="Borrowed"
-          value={borrowedAssets ? borrowedAssets.length : 0}
-          desc="Currently borrowed"
-        />
-        <SectionCard
-          title="Issued"
-          value={issuedAssets ? issuedAssets.length : 0}
-          desc="Currently issued"
-        />
+
+
+
+        <SectionCard title="Under Repair" value={underRepairCount} desc="Assets in repair" />
+        <SectionCard title="Borrowed" value={borrowedCount} desc="Currently borrowed" />
+        <SectionCard title="Issued" value={issuedCount} desc="Currently issued" />
+
+
+
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <AssetListCard
@@ -199,6 +261,15 @@ function Dashboard() {
           )}
         </AssetListCard>
       </div>
+
+    <ChartBarStacked
+  chartData={subCategoryAvailability}
+  title="Available per Subcategory"
+  description="Available vs. unavailable assets across all subcategories"
+/>
+
+
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <ChartBar
           chartData={companyBorrows}

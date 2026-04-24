@@ -54,6 +54,7 @@ interface DataTableProps<TData, TValue> {
   >;
   placeholder?: string;
   hasAssetBatchUpload?: boolean;
+  hideNewButton?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -67,6 +68,7 @@ export function DataTable<TData, TValue>({
   onColumnVisibilityChange,
   placeholder = "Search asset...",
   hasAssetBatchUpload,
+  hideNewButton,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -214,14 +216,14 @@ export function DataTable<TData, TValue>({
                   <FileUp />
                 </Button>
               )}
+               {!hideNewButton && (  
               <FormSheet
                 type={type}
                 taskName="Add a New"
-                button={
-                  <FormSheetTrigger icon={Plus} buttonName="New" name="Add" />
-                }
+                button={<FormSheetTrigger icon={Plus} buttonName="New" name="Add" />}
                 form={form}
               />
+            )}
             </ButtonGroup>
           </div>
 
@@ -267,7 +269,7 @@ export function DataTable<TData, TValue>({
                     <TableCell
                       key={cell.id}
                       className={
-                        index === row.getVisibleCells().length - 1
+                      index === row.getVisibleCells().length - 1 && cell.column.id === "actions"
                           ? "sticky right-0 opacity-0 group-hover:opacity-100"
                           : ""
                       }

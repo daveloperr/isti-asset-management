@@ -172,24 +172,89 @@ export const useUpdateSubCategory = <TData extends {}>() => {
   });
 };
 
-export const useUpdateType = <TData extends {}>() => {
+  export const useUpdateType = <TData extends {}>() => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: async ({ id, data }: { id: number; data: TData }) => {
+        const response = await api.put(`index.php?resource=${TYPE}`, {
+          id: id,
+          values: Object.values(data).map((value) => {
+            return value;
+          }),
+          columns: Object.keys(data),
+        });
+
+        return response.data;
+      },
+      onSuccess: () => {
+        queryClient.refetchQueries({ queryKey: [TYPE] });
+      },
+      onError: catchError,
+    });
+  };
+
+
+export const useDeleteType = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: async (id: number) => {
+        const res = await api.put(`index.php?resource=${TYPE}`, {
+          id,
+          columns: ['status_id'],
+          values: [14],
+        }); 
+
+        return res.data;
+      },
+      onSuccess: () => {
+        queryClient.refetchQueries({queryKey: [TYPE]});
+      },
+
+      onError: catchError,
+    });
+}
+
+export const useDeleteSubCategory = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: TData }) => {
-      const response = await api.put(`index.php?resource=${TYPE}`, {
-        id: id,
-        values: Object.values(data).map((value) => {
-          return value;
-        }),
-        columns: Object.keys(data),
+    mutationFn: async (id: number) => {
+      const res = await api.put(`index.php?resource=${SUB_CATEGORY}`, {
+        id,
+        columns: ['status_id'],
+        values: [14],
       });
 
-      return response.data;
+      return res.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [TYPE] });
+      queryClient.refetchQueries({ queryKey: [SUB_CATEGORY] });
     },
     onError: catchError,
   });
 };
+
+
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async(id: number) => {
+      const res = await api.put(`index.php?resource=${CATEGORY}`, {
+        id,
+        columns: ['status_id'],
+        values: [14],
+      });
+
+      return res.data;
+    },
+
+    onSuccess: () => {
+      queryClient.refetchQueries({queryKey: [CATEGORY]});
+    },
+
+    onError: catchError,
+  });
+}

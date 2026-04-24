@@ -15,12 +15,16 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useEmployees } from "@/hooks/useUNMG";
 
-function IssuanceForm() {
+interface IssuanceFormProps {
+  onSuccess?: () => void;
+}
+
+function IssuanceForm({ onSuccess }: IssuanceFormProps) {
   const form = useForm<Issuance>({
     resolver: zodResolver(IssuanceSchema),
     defaultValues: {
       asset_id: undefined,
-      category_id: undefined,
+      // category_id: undefined,
       user_id: undefined,
       department_id: undefined,
       issuance_date: undefined,
@@ -28,11 +32,11 @@ function IssuanceForm() {
       status_id: undefined,
       remarks: undefined,
       issuance_id: undefined,
-      sub_category_id: undefined,
-      type_id: undefined,
-      company_id: undefined,
+      // sub_category_id: undefined,
+      // type_id: undefined,
+      // company_id: undefined,
     },
-    mode: "all",
+    mode: "onSubmit",
   });
   const { mutate } = useAddIssuance();
   const { data: assets } = useAssets();
@@ -66,8 +70,12 @@ function IssuanceForm() {
       },
       {
         onSuccess: () => {
+          onSuccess?.();
           toast.success("Successfully added new issuance");
         },
+        onError: () => {
+          toast.error("Failed to issued asset");
+        }
       }
     );
   }

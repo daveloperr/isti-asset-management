@@ -21,7 +21,7 @@ export const useAssets = () => {
         };
       });
     },
-    staleTime: 60 * 10 * 1000,
+    staleTime: 1000 * 30, 
   });
 };
 
@@ -36,9 +36,12 @@ export const useAsset = (id: number) => {
         purchase_date: new Date(item.purchase_date),
       };
     },
-    staleTime: 60 * 10 * 1000,
+    staleTime: 1000 * 30, 
   });
 };
+
+
+
 
 export const useAddAsset = <TData = unknown>() => {
   const queryClient = useQueryClient();
@@ -56,13 +59,13 @@ export const useAddAsset = <TData = unknown>() => {
     },
     onSuccess: (data) => {
       if (typeof data === "object") {
-        queryClient.refetchQueries({ queryKey: [ASSET] });
+        queryClient.invalidateQueries({ queryKey: [ASSET] });
         toast.success("Successfully added new Asset");
       } else {
         throw new Error("Failed to add new Asset");
       }
     },
-    onError: catchError,
+    // onError: catchError,
   });
 };
 
@@ -79,7 +82,7 @@ export const useAddMultipleAssets = <TData = unknown>() => {
     },
     onSuccess: (data) => {
       if (typeof data === "object") {
-        queryClient.refetchQueries({ queryKey: [ASSET] });
+        queryClient.invalidateQueries({ queryKey: [ASSET] });
         toast.success("Successfully added new Asset");
       } else {
         throw new Error("Failed to add new Asset");
@@ -110,7 +113,7 @@ export const useUpdateAsset = <TData extends {}>() => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [ASSET] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
     },
     onError: catchError,
   });
@@ -132,7 +135,7 @@ export const useAddImageAsset = () => {
     },
     onSuccess: (data) => {
       if (typeof data === "object") {
-        queryClient.refetchQueries({ queryKey: [ASSET] });
+        queryClient.invalidateQueries({ queryKey: [ASSET] });
         toast.success("Successfully uploaded Asset Image");
       } else {
         throw new Error("Failed to upload Asset Image");
@@ -142,21 +145,22 @@ export const useAddImageAsset = () => {
   });
 };
 
+
 export const useDeleteAsset = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await api.delete(`index.php?resource=asset`, {
-        params: {
-          id: id,
-        },
+      const response = await api.put(`index.php?resource=asset`, {
+        id,
+        columns: ['status_id'],
+        values: [14],
       });
 
       return response.data;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: [ASSET] });
+      queryClient.invalidateQueries({ queryKey: [ASSET] });
     },
     onError: catchError,
   });

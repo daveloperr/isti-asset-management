@@ -13,8 +13,10 @@ import type { Asset_Category } from "@/data/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AssetCategorySchema } from "@/data/schemas";
 import { useForm } from "react-hook-form";
+import { ButtonGroup } from "@/components/ui/button-group";
 import FormFieldText from "../../forms/fields/FormFieldText";
 import UpdateCategoryForm from "../../forms/update/UpdateCategoryForm";
+import DeleteCategoryForm from "../../forms/delete/DeleteCategoryForm";
 import FormPopoverTrigger from "@/components/ui/form-popover-trigger";
 
 function CategoriesPage() {
@@ -53,7 +55,11 @@ function CategoriesPage() {
               <AccordionTrigger className="px-4 py-3 text-md hover:no-underline">
                 {category.category_name}
               </AccordionTrigger>
-              <UpdateCategoryForm category={category}/>
+              <ButtonGroup className="opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none group-hover:pointer-events-auto ml-2">
+                <UpdateCategoryForm category={category} />
+                <DeleteCategoryForm category={category} />
+              </ButtonGroup>
+
             </div>
             <AccordionContent className="p-0 bg-zinc-100 ">
               <SubCategoriesCollapsible category={category} />
@@ -66,7 +72,7 @@ function CategoriesPage() {
         >
           <PopoverForm
             triggerButton={
-              <FormPopoverTrigger icon={Plus} name="Category" variant="ghost"/>
+              <FormPopoverTrigger icon={Plus} name="Category" variant="ghost" />
             }
             title="New Category"
             description="Add a new category to organize your assets."

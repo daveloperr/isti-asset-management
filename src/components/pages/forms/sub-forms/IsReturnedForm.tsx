@@ -43,10 +43,17 @@ function IsReturnedForm({ borrow }: IsReturnedFormProps) {
   const daysDiff = dueDate ? Math.abs(differenceInDays(today, dueDate)) : 0;
 
   function onReturnCompleted(values: Borrow) {
+     console.log("Submitting:", {
+      asset_condition_id: values.asset_condition_id,
+      return_date: values.return_date,
+      remarks: values.remarks,
+    });
     mutate(
       {
         id: values.borrow_transaction_id as number,
+        type: "return", 
         data: {
+          asset_condition_id: values.asset_condition_id,
           return_date: values.return_date,
           remarks: values.remarks,
         },

@@ -47,13 +47,14 @@ function getCode(name: string): string {
 function AddingDialog({ excelData }: { excelData: any[] }) {
   const queryClient = useQueryClient();
 
+  
   // Prefer async mutate if provided by hooks; fall back to callback-style mutate
   const { mutate: addCategory, mutateAsync: addCategoryAsync } =
     useAddCategory();
   const { mutate: addSubCategory, mutateAsync: addSubCategoryAsync } =
     useAddSubCategory();
   const { mutate: addType, mutateAsync: addTypeAsync } = useAddType();
-  const { mutate: addMultipleAssets, mutateAsync: addMultipleAssetsAsync} = useAddMultipleAssets();
+  const { mutate: addMultipleAssets, mutateAsync: addMultipleAssetsAsync } = useAddMultipleAssets();
 
   const { data: categories } = useCategories();
   const { data: subCategories } = useSubCategories();
@@ -316,7 +317,7 @@ function AddingDialog({ excelData }: { excelData: any[] }) {
             tasks.push(
               callMutateAsyncOrWrap(addTypeAsync, addType, {
                 type_name: typeName,
-                type_code: getCode(typeName),
+                code: getCode(typeName),
                 category_id: catId,
                 sub_category_id: subId,
               }).catch((err) => ({
@@ -409,8 +410,7 @@ function AddingDialog({ excelData }: { excelData: any[] }) {
             (subFound as any)?.sub_category_id ?? (subFound as any)?.id ?? null;
           if (!subCategoryId) {
             errs.push(
-              `Row ${
-                idx + 1
+              `Row ${idx + 1
               }: sub-category "${subName}" not found for category "${catName}"`
             );
           }
@@ -433,8 +433,7 @@ function AddingDialog({ excelData }: { excelData: any[] }) {
             (typeFound as any)?.type_id ?? (typeFound as any)?.id ?? null;
           if (!typeId) {
             errs.push(
-              `Row ${idx + 1}: type "${typeName}" not found for ${catName}/${
-                subName || "(no sub)"
+              `Row ${idx + 1}: type "${typeName}" not found for ${catName}/${subName || "(no sub)"
               }`
             );
           }
@@ -456,6 +455,8 @@ function AddingDialog({ excelData }: { excelData: any[] }) {
           asset_amount: amountNum,
           purchase_date: row?.purchase_date ?? null,
           warranty_due_date: row?.warranty_due_date ?? null,
+          insurance_id: row?.insurance ?? null,  
+          file: row?.file ?? null,              
           notes: row?.notes ?? "",
           location: row?.location ?? "",
         });
@@ -472,6 +473,8 @@ function AddingDialog({ excelData }: { excelData: any[] }) {
         a.asset_amount,
         a.purchase_date,
         a.warranty_due_date,
+        a.insurance_id,  
+        a.file,       
         a.notes,
         a.location,
       ]);
@@ -479,8 +482,8 @@ function AddingDialog({ excelData }: { excelData: any[] }) {
       console.log("Key: ", assetKeys);
       console.log("Assets: ", assetsValues);
 
-      {/* Mutate here */}
-     setProgressText("Sending batch to server...");
+      {/* Mutate here */ }
+      setProgressText("Sending batch to server...");
       // data shape: single parameter 'data'
       const data = {
         columns: assetKeys,

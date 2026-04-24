@@ -1,5 +1,6 @@
 import { AssetSchema } from "@/data/schemas";
 import type { Asset } from "@/data/types";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
@@ -11,6 +12,7 @@ import FormFieldFile from "../fields/FormFieldFile";
 import FormCardContent from "@/components/layout/FormCardContent";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import FormFieldTypeCombobox from "../fields/FormFieldTypeCombobox";
 import FormFieldInsuranceCombobox from "../fields/FormFieldInsuranceCombobox";
 import { useTypes } from "@/hooks/useCategory";
@@ -29,7 +31,7 @@ function AssetForm({ onSuccess }: AssetFormProps) {
     resolver: zodResolver(AssetSchema),
     defaultValues: {
       serial_number: undefined,
-      category_id: undefined,
+      category_id: 0,
       location: undefined, // Changed from "undefined" string
       brand: undefined,
       specifications: undefined,
@@ -39,8 +41,8 @@ function AssetForm({ onSuccess }: AssetFormProps) {
       notes: undefined, // Changed to empty string
       insurance_id: undefined,
       file: undefined, // Changed to null
-      sub_category_id: undefined,
-      type_id: undefined,
+      sub_category_id: 0,
+      type_id: 0,
       asset_condition_id: 4, // New
       status_id: 1,
       warranty_duration: 1,
@@ -76,6 +78,23 @@ function AssetForm({ onSuccess }: AssetFormProps) {
           onSuccess?.();
           form.reset();
         },
+        onError: (error: any) => {
+          const backendMessage = error.response?.data?.message;
+
+          if (backendMessage) {
+            toast.error(backendMessage);
+
+            if (error.response.status === 409) {
+              form.setError("serial_number", {
+                type: "manual",
+                message: backendMessage,
+              });
+            }
+          } else {
+            toast.error("Failed to add Asset");
+          }
+        }
+
       }
     );
   }

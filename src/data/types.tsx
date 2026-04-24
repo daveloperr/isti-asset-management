@@ -2,6 +2,7 @@ import type z from "zod";
 import type {
   AssetSchema,
   InsuranceSchema,
+  LogSchema,
   RepairSchema,
   BorrowSchema,
   IssuanceSchema,
@@ -15,10 +16,16 @@ import type {
   AssetSubCategorySchema,
   AssetTypeSchema,
   AssetFileSchema,
+
+  LoginSchema,
+  UserSchema,
+  LoginResponseSchema,
+  MeResponseSchema
 } from "./schemas";
 
 export type Asset = z.infer<typeof AssetSchema>;
 export type Insurance = z.infer<typeof InsuranceSchema>;
+export type Logs = z.infer<typeof LogSchema>
 export type Repair = z.infer<typeof RepairSchema>;
 export type Borrow = z.infer<typeof BorrowSchema>;
 export type Issuance = z.infer<typeof IssuanceSchema>;
@@ -32,6 +39,11 @@ export type Asset_Category = z.infer<typeof AssetCategorySchema>;
 export type Asset_Sub_Category = z.infer<typeof AssetSubCategorySchema>;
 export type Asset_Type = z.infer<typeof AssetTypeSchema>;
 export type AssetFile = z.infer<typeof AssetFileSchema>;
+
+export type Login = z.infer<typeof LoginSchema>
+export type User = z.infer<typeof UserSchema>
+export type LoginResponse = z.infer<typeof LoginResponseSchema>
+export type MeResponse = z.infer<typeof MeResponseSchema>
 
 export type Urgency = {
   urgency_id: number;

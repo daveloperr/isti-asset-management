@@ -12,8 +12,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormFieldText from "../../forms/fields/FormFieldText";
 import PopoverForm from "@/components/layout/PopoverForm";
+import DeleteSubCategoriesForm from "../../forms/delete/DeleteSubCategoriesForm";
 import UpdateSubCategoryForm from "../../forms/update/UpdateSubcategoryForm";
 import FormPopoverTrigger from "@/components/ui/form-popover-trigger";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 function SubCategoriesCollapsible({ category }: { category: Asset_Category }) {
   const form = useForm<Asset_Sub_Category>({
@@ -36,7 +38,11 @@ function SubCategoriesCollapsible({ category }: { category: Asset_Category }) {
   return (
     <div className="pl-3 pb-3">
       {subCategories
-        ?.filter((subCat) => category.category_id === subCat.category_id)
+        ?.filter((subCat) => 
+          category.category_id === subCat.category_id &&
+          subCat.sub_category_id != null
+      
+      )
         .map((subCat) => (
           <Collapsible
             className="space-y-1 border-border border-t px-4 py-3 "
@@ -53,7 +59,10 @@ function SubCategoriesCollapsible({ category }: { category: Asset_Category }) {
                   />
                   {subCat.sub_category_name}
                 </div>
-                <UpdateSubCategoryForm subCategory={subCat} />
+                <ButtonGroup className="opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none group-hover:pointer-events-auto ml-2">
+                  <UpdateSubCategoryForm subCategory={subCat} />
+                  <DeleteSubCategoriesForm subCategory={subCat} />
+                </ButtonGroup>
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent className="overflow-hidden text-muted-foreground text-sm transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down ">

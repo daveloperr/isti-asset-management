@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 const url = import.meta.env.VITE_SERVER;
-const api = axios.create({ baseURL: url, timeout: 60000 });
+const api = axios.create({ baseURL: url, timeout: 60000, withCredentials: true });
 // api.interceptors.request.use((config) => {
 //     const token = localStorage.getItem("token") // Check if may token
 //     if (!token) throw new Error("Token not found!");
@@ -13,13 +13,11 @@ const api = axios.create({ baseURL: url, timeout: 60000 });
 api.interceptors.response.use(
   (res) => res,
   (error: AxiosError) => {
-    toast.error(
-      error.message === "Network Error"
-        ? "The host cannot connect to the server ..."
-        : error.message
-    );
+    if (error.message === "Network Error") {
+      return Promise.reject(new Error("The host cannot connect to the server ..."));
+    }
 
-    return Promise.reject(error.message);
+    return Promise.reject(error);
   }
 );
 

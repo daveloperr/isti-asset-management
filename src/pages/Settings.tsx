@@ -1,6 +1,6 @@
 import { SettingsSidebar } from "@/components/ui/settings-sidebar";
 import type { AppRoutes } from "@/data/types";
-import { Layers, Settings2, Recycle, Shield } from "lucide-react";
+import { Layers, Settings2, Recycle, Shield, Logs } from "lucide-react";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -24,6 +24,11 @@ const settingsMenu: AppRoutes[] = [
     title: "Recycle Bin",
     url: "recycle_bin",
     icon: Recycle,
+  },
+  {
+    title: "Activity Logs",
+    url: "activity_logs",
+    icon: Logs,
   },
 ];
 

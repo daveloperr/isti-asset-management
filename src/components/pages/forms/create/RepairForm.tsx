@@ -19,6 +19,8 @@ import { useUrgencies } from "@/hooks/useUrgency";
 import { useAddRepair, useRepairs } from "@/hooks/useRepair";
 import { useLookupFunctions } from "@/hooks/useLookupFunctions";
 import { useIssuances } from "@/hooks/useIssuance";
+import { useBorrows } from "@/hooks/useBorrow";
+
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { useEmployees } from "@/hooks/useUNMG";
@@ -41,7 +43,7 @@ function RepairForm({ onSuccess }: RepairFormProps) {
       department_id: undefined,
       company_id: undefined,
       issue: undefined,
-      urgency_id: 4,
+      urgency_id: undefined,
       status_id: undefined,
       remarks: undefined,
       date_reported: new Date(),
@@ -58,6 +60,7 @@ function RepairForm({ onSuccess }: RepairFormProps) {
   const { data: issuances } = useIssuances();
   const { data: urgencies } = useUrgencies();
   const { data: employees } = useEmployees();
+  const { data: borrows } = useBorrows();
   const { getStatuses, getStatusIdGivenStatusName, getAsset } =
     useLookupFunctions();
 
@@ -69,7 +72,7 @@ function RepairForm({ onSuccess }: RepairFormProps) {
     asset && asset.purchase_date ? new Date(asset.purchase_date) : undefined;
 
   const userAssets = useMemo(() => {
-    if (!selectedUserId || !assets || !issuances) return [];
+    if (!selectedUserId || !assets || !issuances || !borrows) return [];
     const blockedStatusIds = new Set(
       (statuses ?? [])
         .filter((s) =>
@@ -82,23 +85,32 @@ function RepairForm({ onSuccess }: RepairFormProps) {
       "Asset Inventory",
       "Deleted"
     );
-    const userAssetIds = (issuances ?? [])
+    const userAssetIds = [
+      ...(issuances ?? []),
+      ...(borrows ?? []),
+    ]
+
       .filter((iss) => Number(iss.user_id) === uid)
       .map((iss) => iss.asset_id)
       .filter((id): id is number => typeof id === "number");
+
     const isRepairable = (assetId: number) => {
       const entries = (repairs ?? []).filter((r) => r.asset_id === assetId);
       if (entries.length === 0) return true;
       return entries.every((r) => !blockedStatusIds.has(r.status_id as number));
     };
+
+
     const allowedIds = new Set(userAssetIds.filter(isRepairable));
     return (assets ?? []).filter(
       (a) =>
         allowedIds.has(a.asset_id as number) && a.status_id !== deletedStatusId
     );
-  }, [selectedUserId, assets, issuances, repairs, statuses]);
+  }, [selectedUserId, assets, issuances, borrows, repairs, statuses]);
 
   function onSubmit(values: Repair) {
+        console.log(values);
+
     mutate(
       {
         ...values,
@@ -195,7 +207,6 @@ function RepairForm({ onSuccess }: RepairFormProps) {
           <Button
             className="w-full flex items-center justify-center rounded-md"
             type="submit"
-            form="repair-form"
           >
             <Plus />
             Repair Request

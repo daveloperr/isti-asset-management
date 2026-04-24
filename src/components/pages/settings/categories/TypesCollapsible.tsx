@@ -1,4 +1,5 @@
 import PopoverForm from "@/components/layout/PopoverForm";
+import { checkDuplicateField } from "@/lib/assetValidation";
 import { AssetTypeSchema } from "@/data/schemas";
 import type {
   Asset_Category,
@@ -11,7 +12,9 @@ import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import FormFieldText from "../../forms/fields/FormFieldText";
 import UpdateTypeForm from "../../forms/update/UpdateTypeForm";
+import DeleteTypeForm from "../../forms/delete/DeleteTypeForm";
 import FormPopoverTrigger from "@/components/ui/form-popover-trigger";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 interface TypesCollapsibleProps {
   category: Asset_Category;
@@ -19,6 +22,7 @@ interface TypesCollapsibleProps {
 }
 
 function TypesCollapsible({ category, subCat }: TypesCollapsibleProps) {
+  const { data: types } = useTypes();
   const form = useForm<Asset_Type>({
     resolver: zodResolver(AssetTypeSchema),
     defaultValues: {
@@ -29,10 +33,10 @@ function TypesCollapsible({ category, subCat }: TypesCollapsibleProps) {
       code: subCat.code,
       type_name: undefined,
       type_code: undefined,
+      status_id: 1,
     },
   });
 
-  const { data: types } = useTypes();
   const { mutate } = useAddType();
 
   function formatTypeName(name: string) {
@@ -40,10 +44,25 @@ function TypesCollapsible({ category, subCat }: TypesCollapsibleProps) {
     return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
   }
 
+
   function onAddType(values: Asset_Type) {
-    console.log(values);
-    mutate(values);
+    const isDuplicateName = checkDuplicateField(types, values.type_name, "type_name");
+    const isDuplicateCode = checkDuplicateField(types, values.type_code, "type_code");
+
+    if (isDuplicateName) {
+      form.setError("type_name", { type: "manual", message: "Type name already exists." });
+      return false;
+    }
+
+    if (isDuplicateCode) {
+      form.setError("type_code", { type: "manual", message: "Type code already exists." });
+      return false;
+    }
+
+    mutate(values, { onSuccess: () => form.reset() });
+    return true;
   }
+
 
   return (
     <div className="pt-2 ml-6 mr-6">
@@ -51,12 +70,16 @@ function TypesCollapsible({ category, subCat }: TypesCollapsibleProps) {
         ?.filter(
           (type) =>
             category.category_id === type.category_id &&
-            subCat.sub_category_id === type.sub_category_id
+            subCat.sub_category_id === type.sub_category_id &&
+            type.type_id != null
         )
         .map((type) => (
-          <div className="flex justify-start items-center group">
-            <div className="border-t p-2">{formatTypeName(type.type_name)}</div>
-            <UpdateTypeForm type={type} />
+          <div key={type.type_id} className="flex justify-start items-center group">
+            <div className="p-3 m-">{formatTypeName(type.type_name)}</div>
+            <ButtonGroup className="opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none group-hover:pointer-events-auto">
+              <UpdateTypeForm type={type} />
+              <DeleteTypeForm type={type} />
+            </ButtonGroup>
           </div>
         ))}
 
