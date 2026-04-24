@@ -9,7 +9,7 @@ function Header() {
     const pathname = location.pathname;
 
     if (pathname === "/") return "Dashboard";
-    if (pathname.includes("assets")) return "Assets";
+    if (pathname.includes("masterlist")) return "Assets";
     if (pathname.includes("repair")) return "Repair";
     if (pathname.includes("borrow")) return "Borrow";
     if (pathname.includes("issuance")) return "Issuance";
